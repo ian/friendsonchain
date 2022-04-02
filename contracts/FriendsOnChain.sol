@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol";
 
 contract FriendsOnChain is ERC1155, Ownable {
   using Address for address payable;
@@ -19,9 +18,10 @@ contract FriendsOnChain is ERC1155, Ownable {
   uint256 private pricePerToken = 0; // in case you want to charge for this
 
   Counters.Counter private nextTokenId;
-  mapping(address => uint8) private greenList;
 
-  constructor() ERC1155("https://bunches.app/metadata/{id}.json") {
+  event GroupCreated(uint256 tokenId, address[] indexed _to);
+
+  constructor() ERC1155("https://bunches.app/metadata/{id}") {
     // nextTokenId is initialized to 1, since starting at 0 leads to higher gas cost for the first minter
     nextTokenId.increment();
   }
@@ -44,6 +44,8 @@ contract FriendsOnChain is ERC1155, Ownable {
     for (uint256 i = 0; i < _to.length; i++) {
       _mint(_to[i], currentTokenId, 1, "");
     }
+
+    emit GroupCreated(currentTokenId, _to);
 
     nextTokenId.increment();
   }

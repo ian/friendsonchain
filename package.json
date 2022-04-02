@@ -11,7 +11,8 @@
     "clean": "hardhat clean",
     "build": "hardhat compile",
     "test": "hardhat test",
-    "test:watch": "nodemon --exec \"hardhat test\" --watch test/**/* "
+    "test:watch": "nodemon --exec \"hardhat test\" --watch test/**/* ",
+    "coverage": "npx hardhat coverage"
   },
   "dependencies": {
     "@ethersproject/abi": "^5.5.0",
@@ -51,7 +52,7 @@
     "prettier": "^2.5.1",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^3.3.6",
-    "solidity-coverage": "^0.7.18",
+    "solidity-coverage": "^0.7.20",
     "ts-node": "^10.4.0",
     "typechain": "^5.2.0",
     "typescript": "^4.5.5"
