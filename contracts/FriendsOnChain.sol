@@ -14,9 +14,9 @@ contract FriendsOnChain is ERC1155, Ownable {
   using Counters for Counters.Counter;
   using Strings for uint256;
 
-  uint256 MAX_SUPPLY = 0; // default unlimited
-  uint256 MAX_OWNERS = 7; // limit groups to 7 for now
-  uint256 PRICE_PER_TOKEN = 0; // by default the price to mint is free
+  uint256 private maxSupply = 0; // default unlimited
+  uint256 private maxOwners = 7; // limit groups to 7 for now
+  uint256 private pricePerToken = 0; // in case you want to charge for this
 
   Counters.Counter private nextTokenId;
   mapping(address => uint8) private greenList;
@@ -27,34 +27,38 @@ contract FriendsOnChain is ERC1155, Ownable {
   }
 
   /// @notice Mint a token for up to maxOwners addresses
-  /// @param to the recipients of the token
-  function createGroup(address[] memory to) external payable {
+  /// @param _to the recipients of the token
+  function createGroup(address[] memory _to) external payable {
     uint256 currentTokenId = nextTokenId.current();
 
     require(
-      MAX_OWNERS == 0 || to.length < MAX_OWNERS,
+      maxOwners == 0 || _to.length < maxOwners,
       "Maximum number of owners exceeded"
     );
-    require(msg.value == PRICE_PER_TOKEN, "Incorrect payment");
+    require(msg.value == pricePerToken, "Incorrect payment");
     require(
-      MAX_SUPPLY == 0 || currentTokenId < MAX_SUPPLY,
+      maxSupply == 0 || currentTokenId < maxSupply,
       "Maximum number of tokens reached"
     );
 
-    for (uint256 i = 0; i < to.length; i++) {
-      _mint(to[i], currentTokenId, 1, "");
+    for (uint256 i = 0; i < _to.length; i++) {
+      _mint(_to[i], currentTokenId, 1, "");
     }
 
     nextTokenId.increment();
   }
 
-  function isMember(address addy, uint256 tokenId) public view returns (bool) {
-    return balanceOf(addy, tokenId) > 0;
+  function isMember(address _addy, uint256 _tokenId)
+    public
+    view
+    returns (bool)
+  {
+    return balanceOf(_addy, _tokenId) > 0;
   }
 
   // @dev Returns the max token supply allowed by the contract
   function price() public view returns (uint256) {
-    return PRICE_PER_TOKEN;
+    return pricePerToken;
   }
 
   // @dev Returns the total number of mints
@@ -64,22 +68,22 @@ contract FriendsOnChain is ERC1155, Ownable {
 
   /// @notice Allows to change the price
   /// @dev Allows the owner to change the price
-  /// @param newPrice the new price
-  function setPrice(uint256 newPrice) public onlyOwner {
-    PRICE_PER_TOKEN = newPrice;
+  /// @param _newPrice the new price
+  function setPrice(uint256 _newPrice) public onlyOwner {
+    pricePerToken = _newPrice;
   }
 
   /// @notice Allows to change the max supply
   /// @dev Allows the owner to change max number of tokens
-  /// @param newSupply the new maximum number of passes
-  function setMaxSupply(uint256 newSupply) public onlyOwner {
-    MAX_SUPPLY = newSupply;
+  /// @param _newSupply the new maximum number of passes
+  function setMaxSupply(uint256 _newSupply) public onlyOwner {
+    maxSupply = _newSupply;
   }
 
   /// @notice Allows to change the max owners per token
   /// @dev Allows the owner to change
-  /// @param newOwners the new maximum number of passes
-  function setMaxOwners(uint256 newOwners) public onlyOwner {
-    MAX_OWNERS = newOwners;
+  /// @param _newMaxOwners the new maximum number of passes
+  function setMaxOwners(uint256 _newMaxOwners) public onlyOwner {
+    maxOwners = _newMaxOwners;
   }
 }
