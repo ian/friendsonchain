@@ -2,14 +2,14 @@ const { ethers } = require("hardhat")
 const { deployContract } = require("./helpers.js")
 const { expect } = require("chai")
 
-describe("GroupPass", () => {
+describe("FriendsOnChain", () => {
   beforeEach(async function () {
     const [owner, addr1, addr2] = await ethers.getSigners()
     this.owner = owner
     this.addr1 = addr1
     this.addr2 = addr2
 
-    this.contract = await deployContract("GroupPass", [])
+    this.contract = await deployContract("FriendsOnChain", [])
   })
 
   context("default deployment", async function () {
@@ -38,12 +38,12 @@ describe("GroupPass", () => {
     })
   })
 
-  context("mint()", async function () {
+  context("createGroup()", async function () {
     context("error cases", async function () {
       it("errors when the wrong amount of ether is sent", async function () {
         this.contract.setPrice(1 * 1e18)
         expect(
-          this.contract.mint([this.addr1.address], {
+          this.contract.createGroup([this.addr1.address], {
             value: 0
           })
         ).to.be.revertedWith("Ether value sent is not correct")
@@ -51,16 +51,18 @@ describe("GroupPass", () => {
 
       it("errors when too many addresses are specified", async function () {
         expect(
-          this.contract.mint([this.addr1.address], {
+          this.contract.createGroup([this.addr1.address], {
             value: 0
           })
         ).to.be.revertedWith("Ether value sent is not correct")
       })
     })
 
-    context("successfully minting", async function () {
+    context("successfully", async function () {
       beforeEach(async function () {
-        await this.contract.connect(this.addr1).mint([this.addr1.address])
+        await this.contract
+          .connect(this.addr1)
+          .createGroup([this.addr1.address])
       })
 
       it("has 1 totalMinted", async function () {
@@ -72,28 +74,6 @@ describe("GroupPass", () => {
         const balanceOf = await this.contract.balanceOf(this.addr1.address, "1")
         expect(balanceOf).to.equal(1)
       })
-    })
-  })
-
-  context("pausing", async function () {
-    it("should be unpaused by default", async function () {
-      const paused = await this.contract.paused()
-      expect(paused).to.equal(false)
-    })
-
-    it("should be pausable / unpausable", async function () {
-      await this.contract.pause()
-      expect(await this.contract.paused()).to.equal(true)
-      await this.contract.unpause()
-      expect(await this.contract.paused()).to.equal(false)
-    })
-
-    it("should disallow mint() on paused contracts", async function () {
-      expect(() => this.contract.mint([this.addr1.address])).not.to.throw()
-
-      await this.contract.pause()
-
-      expect(this.contract.mint([this.addr1.address])).to.be.revertedWith()
     })
   })
 })

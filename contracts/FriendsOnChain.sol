@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol";
 
-contract GroupPass is ERC1155, ERC1155Pausable, Ownable {
+contract FriendsOnChain is ERC1155, Ownable {
   using Address for address payable;
   using Counters for Counters.Counter;
   using Strings for uint256;
@@ -28,7 +28,7 @@ contract GroupPass is ERC1155, ERC1155Pausable, Ownable {
 
   /// @notice Mint a token for up to maxOwners addresses
   /// @param to the recipients of the token
-  function mint(address[] memory to) external payable {
+  function createGroup(address[] memory to) external payable {
     uint256 currentTokenId = nextTokenId.current();
 
     require(
@@ -46,6 +46,10 @@ contract GroupPass is ERC1155, ERC1155Pausable, Ownable {
     }
 
     nextTokenId.increment();
+  }
+
+  function isMember(address addy, uint256 tokenId) public view returns (bool) {
+    return balanceOf(addy, tokenId) > 0;
   }
 
   // @dev Returns the max token supply allowed by the contract
@@ -77,27 +81,5 @@ contract GroupPass is ERC1155, ERC1155Pausable, Ownable {
   /// @param newOwners the new maximum number of passes
   function setMaxOwners(uint256 newOwners) public onlyOwner {
     MAX_OWNERS = newOwners;
-  }
-
-  /// @notice Pause the contract to new mints
-  function pause() external onlyOwner {
-    _pause();
-  }
-
-  /// @notice Allow new mints again
-  function unpause() external onlyOwner {
-    _unpause();
-  }
-
-  function _beforeTokenTransfer(
-    address operator,
-    address from,
-    address to,
-    uint256[] memory ids,
-    uint256[] memory amounts,
-    bytes memory data
-  ) internal virtual override(ERC1155, ERC1155Pausable) {
-    require(!paused(), "No token transfers while paused");
-    super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
   }
 }
