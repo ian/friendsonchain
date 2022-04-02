@@ -35,5 +35,12 @@ This will mint a new token with the 7 addresses with TokenID 1. TokenID will aut
 To check if an address is a member of the group:
 
 ```
-contract.isMember("0x1...", "1") // accepts (address, tokenId)
+// function isMember(address, tokenId)
+contract.isMember("0x1...", "1") => true | false
 ```
+
+## Caveats ...
+
+Currently, transfers are not prohibited so a member of the group may transfer their membership to another address. This would allow someone else to gain access to the group.
+
+This can be disabled but will require overriding `safeTransferFrom` and `safeBatchTransferFrom`.

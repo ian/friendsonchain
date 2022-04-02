@@ -62,7 +62,7 @@ contract FriendsOnChain is ERC1155, Ownable {
   }
 
   // @dev Returns the total number of mints
-  function totalMinted() public view returns (uint256) {
+  function countGroups() public view returns (uint256) {
     return nextTokenId.current() - 1;
   }
 

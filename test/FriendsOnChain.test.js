@@ -13,9 +13,9 @@ describe("FriendsOnChain", () => {
   })
 
   context("default deployment", async function () {
-    it("has 0 totalMinted", async function () {
-      const totalMinted = await this.contract.totalMinted()
-      expect(totalMinted).to.equal(0)
+    it("has 0 countGroups", async function () {
+      const countGroups = await this.contract.countGroups()
+      expect(countGroups).to.equal(0)
     })
 
     it("has the correct price", async function () {
@@ -65,14 +65,18 @@ describe("FriendsOnChain", () => {
           .createGroup([this.addr1.address])
       })
 
-      it("has 1 totalMinted", async function () {
-        const totalMinted = await this.contract.totalMinted()
-        expect(totalMinted).to.equal(1)
+      it("countGroups is 1", async function () {
+        const countGroups = await this.contract.countGroups()
+        expect(countGroups).to.equal(1)
       })
 
-      it("has 1 token minted to the address specified", async function () {
-        const balanceOf = await this.contract.balanceOf(this.addr1.address, "1")
-        expect(balanceOf).to.equal(1)
+      it("isMember is true", async function () {
+        expect(await this.contract.isMember(this.addr1.address, "1")).to.equal(
+          true
+        )
+        expect(await this.contract.isMember(this.addr2.address, "1")).to.equal(
+          false
+        )
       })
     })
   })
