@@ -21,7 +21,7 @@ contract FriendsOnChain is ERC1155, Ownable {
 
   event GroupCreated(uint256 tokenId, address[] indexed _to);
 
-  constructor() ERC1155("https://bunches.app/metadata/{id}") {
+  constructor() ERC1155("https://bunches.xyz/foc/metadata/{id}") {
     // nextTokenId is initialized to 1, since starting at 0 leads to higher gas cost for the first minter
     nextTokenId.increment();
   }
