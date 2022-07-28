@@ -48,7 +48,7 @@ contract FriendsOnChain is ERC1155, Ownable {
     uint256 currentTokenId = nextTokenId.current();
 
     require(
-      maxOwners == 0 || _to.length < maxOwners,
+      maxOwners == 0 || _to.length <= maxOwners,
       "Maximum number of owners exceeded"
     );
     require(msg.value == pricePerToken, "Incorrect payment");
