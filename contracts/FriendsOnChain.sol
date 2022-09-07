@@ -24,7 +24,7 @@ contract FriendsOnChain is ERC1155, Ownable {
   // Defaults to 0. 0 is unlimited supply.
   uint256 private maxSupply = 0;
 
-  // Indicates the number of people in a FOC, including the minter. Defaults to 7.
+  // Indicates the number of people in a FOC, including the minter. Defaults to 7. 0 is unlimited.
   uint256 private maxOwners = 7;
 
   // Defaults to free mint. Denominated in wei.
