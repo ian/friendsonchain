@@ -15,9 +15,9 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 
-// @title Friends on Chain
+// @title Friends on ChainV2
 // @author Ian Hunter (@ianh), Derek Brown (@derekbrown)
-contract FriendsOnChain is Initializable, ERC1155Upgradeable, OwnableUpgradeable {
+contract FriendsOnChainV2 is Initializable, ERC1155Upgradeable, OwnableUpgradeable {
   using Counters for Counters.Counter;
   using Strings for uint256;
 
@@ -33,7 +33,10 @@ contract FriendsOnChain is Initializable, ERC1155Upgradeable, OwnableUpgradeable
   // Use OpenZeppelin Counters for incrementing - do NOT access counter's underlying value.
   Counters.Counter private nextTokenId;
 
+  mapping(uint256 => address[]) private ownersOfToken;
+
   event GroupCreated(uint256 tokenId, address[] indexed _to);
+  event FriendAddedToGroup(uint256 tokenId, address indexed _to);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -71,11 +74,32 @@ contract FriendsOnChain is Initializable, ERC1155Upgradeable, OwnableUpgradeable
       _mint(_to[i], currentTokenId, 1, "");
     }
 
+    ownersOfToken[currentTokenId] = _to;
+
     emit GroupCreated(currentTokenId, _to);
 
     nextTokenId.increment();
   }
 
+  /// @notice Adds new address to an exisiting Group
+  function addFriendToGroup(address _newFriend, uint256 _tokenId) public payable onlyMemberOrOwner(_tokenId) {
+    require(balanceOf(_newFriend, _tokenId) == 0, "Only 1 of each token is allowed per address");
+    require(msg.value == pricePerToken, "Incorrect payment");
+    address[] memory _ownersOfToken = ownersOfToken[_tokenId]; 
+    require(_ownersOfToken.length < maxOwners, "Maximun number of owners exceeded");
+    _mint(_newFriend, _tokenId, 1, "");
+
+    uint256 length = _ownersOfToken.length + 1;
+    address[] memory _newOwnersOfToken = new address[](length);
+    for (uint256 i = 0; i < length - 1; i++){
+      _newOwnersOfToken[i] = _ownersOfToken[i];
+    }
+    _newOwnersOfToken[length - 1] = _newFriend;
+    ownersOfToken[_tokenId] = _newOwnersOfToken;
+
+    emit FriendAddedToGroup(_tokenId, _newFriend);
+  }
+  
   /// @notice Returns whether the given address is a member of a given tokenId.
   /// @param _addr address for potential member
   /// @param _tokenId queried FOC token ID
@@ -100,7 +124,13 @@ contract FriendsOnChain is Initializable, ERC1155Upgradeable, OwnableUpgradeable
   function countGroups() public view returns (uint256) {
     return nextTokenId.current() - 1;
   }
-  
+
+  /// @notice Returns the owners of a specific token
+  /// @param _tokenId the FOC token ID
+  /// @return Owners of a token as an array of addresses
+  function ownersOf(uint256 _tokenId) public view returns(address[] memory) {
+    return ownersOfToken[_tokenId];
+  }
 
   /// @notice Change the mint price of FOCs.
   /// @dev Only the owner can change. No conversions, so denominated in wei.
@@ -127,5 +157,11 @@ contract FriendsOnChain is Initializable, ERC1155Upgradeable, OwnableUpgradeable
   /// @dev Serves a JSON object per OpenSea standards.
   function contractURI() public pure returns (string memory) {
     return "https://bunches.xyz/foc/contract/metadata";
+  }
+
+  /// @notice Requires caller to own this token or be the owner
+  modifier onlyMemberOrOwner(uint256 _tokenId) {
+    require(isMember(msg.sender, _tokenId) || msg.sender == owner(), "Must be Owner or Group Member");
+    _;
   }
 }
